@@ -138,4 +138,3 @@ if __name__ == "__main__":
         db.drop_all()   # limpa tabelas antigas
         db.create_all() # cria tabelas corretas (users, clientes)
     app.run(debug=True)
-
