@@ -21,6 +21,7 @@ jwt = JWTManager(app)
 
 # MODELS
 class User(db.Model):
+    __tablename__ = "users"   # nome da tabela ajustado
     id = db.Column(db.Integer, primary_key=True)
     usuario = db.Column(db.String(50), unique=True, nullable=False)
     senha = db.Column(db.String(200), nullable=False)
@@ -32,6 +33,7 @@ class User(db.Model):
         self.role = role
 
 class Cliente(db.Model):
+    __tablename__ = "clientes"   # nome da tabela ajustado
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
 
@@ -133,5 +135,7 @@ def excluir_cliente(id):
 # Inicialização
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()  # cria tabelas no banco do Render
+        db.drop_all()   # limpa tabelas antigas
+        db.create_all() # cria tabelas corretas (users, clientes)
     app.run(debug=True)
+
