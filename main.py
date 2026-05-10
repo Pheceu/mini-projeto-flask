@@ -8,13 +8,11 @@ import os
 
 app = Flask(__name__)
 
-# Configuração do banco PostgreSQL
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-    "DATABASE_URL")
-
+# Configuração do banco PostgreSQL (Render)
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Chave JWT (use uma chave longa e segura)
+# Chave JWT (variável de ambiente no Render)
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 
 # Inicializações
@@ -42,13 +40,13 @@ class Cliente(db.Model):
 def home():
     return "API rodando com Flask + SQLAlchemy + JWT!"
 
-# Criar conta (permitindo definir role)
+# Criar conta
 @app.route("/register", methods=["POST"])
 def register():
     dados = request.json
     usuario = dados.get("usuario")
     senha = dados.get("senha")
-    role = dados.get("role", "user")  # por padrão, user
+    role = dados.get("role", "user")
 
     if User.query.filter_by(usuario=usuario).first():
         return jsonify(msg="Usuário já existe"), 400
@@ -73,7 +71,6 @@ def login():
         return jsonify(msg="Usuário ou senha inválidos"), 401
 
 # CRUD de Clientes
-# Criar cliente (apenas admin)
 @app.route("/clientes", methods=["POST"])
 @jwt_required()
 def criar_cliente():
@@ -91,7 +88,6 @@ def criar_cliente():
     db.session.commit()
     return jsonify(msg="Cliente criado com sucesso!"), 201
 
-# Listar clientes (qualquer usuário autenticado)
 @app.route("/clientes", methods=["GET"])
 @jwt_required()
 def listar_clientes():
@@ -99,7 +95,6 @@ def listar_clientes():
     lista = [{"id": c.id, "nome": c.nome} for c in clientes]
     return jsonify(lista), 200
 
-# Editar cliente (apenas admin)
 @app.route("/clientes/<int:id>", methods=["PUT"])
 @jwt_required()
 def editar_cliente(id):
@@ -118,7 +113,6 @@ def editar_cliente(id):
     db.session.commit()
     return jsonify(msg="Cliente atualizado com sucesso!"), 200
 
-# Excluir cliente (apenas admin)
 @app.route("/clientes/<int:id>", methods=["DELETE"])
 @jwt_required()
 def excluir_cliente(id):
@@ -136,7 +130,8 @@ def excluir_cliente(id):
     db.session.commit()
     return jsonify(msg="Cliente excluído com sucesso!"), 200
 
+# Inicialização
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()  # cria tabelas no banco
+        db.create_all()  # cria tabelas no banco do Render
     app.run(debug=True)
