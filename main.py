@@ -4,7 +4,7 @@ from flask_jwt_extended import (
     JWTManager, create_access_token, jwt_required, get_jwt_identity
 )
 from werkzeug.security import generate_password_hash, check_password_hash
-import os # Importa o módulo os
+import os
 
 app = Flask(__name__)
 
@@ -132,9 +132,10 @@ def excluir_cliente(id):
     db.session.commit()
     return jsonify(msg="Cliente excluído com sucesso!"), 200
 
-# Inicialização
+# Recriação das tabelas sempre que o app sobe (inclusive no Render/Gunicorn)
+with app.app_context():
+    db.drop_all()
+    db.create_all()
+
 if __name__ == "__main__":
-    with app.app_context():
-        db.drop_all()   # limpa tabelas antigas
-        db.create_all() # cria tabelas corretas (users, clientes)
     app.run(debug=True)
